@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGO - 群聊</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #2575fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 群聊界面 */
+        #groups-container {
+            width: 800px;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .groups-header {
+            height: 70px;
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        
+        .header-left img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .user-info h3 {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .user-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .header-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .groups-main {
+            display: flex;
+            height: calc(100% - 70px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #f5f7fa;
+            border-right: 1px solid #e6e9ed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 20px;
+            border: 1px solid #e1e4e8;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0a7b0;
+        }
+        
+        .add-group {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e6ebf5;
+            color: #2575fc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-group:hover {
+            background: #2575fc;
+            color: white;
+        }
+        
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e6e9ed;
+            padding: 0 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #7a8594;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #2575fc;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #2575fc;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .groups-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9fafc;
+            scrollbar-width: none;
+        }
+        
+        .group-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+        
+        .group {
+            margin-bottom: 10px;
+        }
+        
+        .group-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2575fc;
+            margin-bottom: 10px;
+            padding-left: 15px;
+        }
+        
+        .group-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .group-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 10px;
+        }
+        
+        .group-item:hover {
+            background: #ebf0fa;
+        }
+        
+        .group-item.active {
+            background: #e1e8ff;
+        }
+        
+        .group-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid #e6e9ed;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .group-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .group-avatar .group-count {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            background: #2575fc;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+            border: 1.5px solid white;
+            z-index: 2;
+        }
+        
+        .group-info {
+            flex: 1;
+        }
+        
+        .group-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .group-info p {
+            font-size: 13px;
+            color: #7a8594;
+        }
+        
+        .group-meta {
+            text-align: right;
+            font-size: 12px;
+            color: #a0a7b0;
+        }
+        
+        .unread {
+            background: #e74c3c;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            margin-top: 3px;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            #groups-container {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .group-info, .search-box input, .add-group span, .tab span {
+                display: none;
+            }
+            
+            .search-box {
+                width: 40px;
+            }
+            
+            .search-box i {
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 群聊界面 -->
+    <div id="groups-container">
+        <div class="groups-header">
+            <div class="header-left" onclick="window.location.href='myPage.html'">
+                <a href="chat.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <img src="./assets/images/千早爱音.jpg" alt="用户头像">
+                <div class="user-info">
+                    <h3>我的群聊</h3>
+                    <p>共 3 个群聊</p>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="header-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="groups-main">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索群聊">
+                    </div>
+                    <div class="add-group">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                
+                <div class="sidebar-tabs">
+                    <div class="tab"><span>消息</span></div>
+                    <div class="tab"><span>联系人</span></div>
+                    <div class="tab active"><span>群聊</span></div>
+                </div>
+                
+                <div class="group-groups">
+                    <div class="group">
+                        <div class="group-title">我的群组</div>
+                        <div class="group-list">
+                            <div class="group-item active">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO图标.jpg" alt="MyGO! Band" class="group-img">
+                                    <div class="group-count">5</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>MyGO! Band</h4>
+                                    <p>千早爱音: 大家周末排练时间确定了吗？</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>15:30</div>
+                                    <div class="unread">3</div>
+                                </div>
+                            </div>
+                            
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊图标.jpg" alt="演出安排" class="group-img">
+                                    <div class="group-count">8</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>演出安排</h4>
+                                    <p>高松灯: 下一场演出曲目单已上传</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>昨天</div>
+                                </div>
+                            </div>
+                            
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊图标2.jpg" alt="新专辑制作" class="group-img">
+                                    <div class="group-count">6</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>新专辑制作</h4>
+                                    <p>三角初华: 新歌Demo已发送，请查收</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>周三</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">已关注</div>
+                        <div class="group-list">
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊t图标4.jpg" alt="音乐爱好者" class="group-img">
+                                    <div class="group-count">128</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>音乐爱好者</h4>
+                                    <p>丰川祥子: 分享了一首新歌</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>周一</div>
+                                </div>
+                            </div>
+                            
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊图标5.jpg" alt="乐器交流" class="group-img">
+                                    <div class="group-count">95</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>乐器交流</h4>
+                                    <p>椎名立希: 推荐一款新吉他弦</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>上周</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">其他</div>
+                        <div class="group-list">
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊图标6.jpg" alt="粉丝后援会" class="group-img">
+                                    <div class="group-count">520</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>粉丝后援会</h4>
+                                    <p>新巡演门票即将开售！</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>2天前</div>
+                                </div>
+                            </div>
+                            
+                            <div class="group-item">
+                                <div class="group-avatar">
+                                    <img src="./assets/images/MyGO群聊图标7.jpg" alt="场地租赁" class="group-img">
+                                    <div class="group-count">32</div>
+                                </div>
+                                <div class="group-info">
+                                    <h4>场地租赁</h4>
+                                    <p>赤坂Live House有新档期</p>
+                                </div>
+                                <div class="group-meta">
+                                    <div>3天前</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="groups-content">
+                <!-- 群聊详情区域 -->
+                <div class="group-detail">
+                    <div class="detail-header">
+                        <div class="back-btn" onclick="history.back()">
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="avatar-container">
+                            <img src="./assets/images/MyGO图标.jpg" alt="MyGO! Band" class="big-avatar">
+                        </div>
+                        <h2 class="group-name">MyGO! Band</h2>
+                        <p class="group-members">5名成员</p>
+                        <div class="group-description">
+                            我们的乐队群，讨论排练、演出和音乐创作
+                        </div>
+                    </div>
+                    
+                    <div class="detail-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>群通话</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-video"></i>
+                            <span>群视频</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-paperclip"></i>
+                            <span>共享文件</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-members">
+                        <h3 class="section-title">群成员</h3>
+                        <div class="members-list">
+                            <div class="member-item">
+                                <img src="./assets/images/千早爱音.jpg" alt="千早爱音" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>千早爱音</h4>
+                                    <p>主唱</p>
+                                </div>
+                                <div class="member-role">
+                                    <span class="admin-badge">群主</span>
+                                </div>
+                            </div>
+                            
+                            <div class="member-item">
+                                <img src="./assets/images/高松灯.jpg" alt="高松灯" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>高松灯</h4>
+                                    <p>吉他手</p>
+                                </div>
+                            </div>
+                            
+                            <div class="member-item">
+                                <img src="./assets/images/椎名立希.jpg" alt="椎名立希" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>椎名立希</h4>
+                                    <p>吉他手</p>
+                                </div>
+                            </div>
+                            
+                            <div class="member-item">
+                                <img src="./assets/images/要乐奈.jpg" alt="要乐奈" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>要乐奈</h4>
+                                    <p>键盘手</p>
+                                </div>
+                            </div>
+                            
+                            <div class="member-item">
+                                <img src="./assets/images/八幡海铃.jpeg" alt="八幡海铃" class="member-avatar">
+                                <div class="member-info">
+                                    <h4>八幡海铃</h4>
+                                    <p>贝斯手</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-member">
+                            <i class="fas fa-user-plus"></i>
+                            <span>添加成员</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-options">
+                        <div class="option-item">
+                            <i class="fas fa-bell"></i>
+                            <span>消息通知</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-star"></i>
+                            <span>置顶群聊</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-file-image"></i>
+                            <span>查看共享文件</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-file-alt"></i>
+                            <span>查看聊天记录</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-ban"></i>
+                            <span>屏蔽群消息</span>
+                        </div>
+                        <div class="option-item leave-group">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>退出群聊</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>MyGO © 2025 版权所有 | 隐私政策 | 服务条款</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 选择群聊事件
+            const groupItems = document.querySelectorAll('.group-item');
+            groupItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    groupItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新右侧详情（实际项目中会通过API获取数据）
+                    const groupName = this.querySelector('h4').textContent;
+                    const groupAvatar = this.querySelector('.group-img').src;
+                    
+                    document.querySelector('.group-name').textContent = groupName;
+                    document.querySelector('.big-avatar').src = groupAvatar;
+                });
+            });
+            
+            // 退出群聊确认
+            const leaveBtn = document.querySelector('.leave-group');
+            leaveBtn.addEventListener('click', function() {
+                if (confirm('确定要退出该群聊吗？')) {
+                    // 实际项目中会发送退出群聊请求
+                    alert('已退出群聊');
+                }
+            });
+        });
+    </script>
+    
+    <style>
+        /* 详情页样式 */
+        .detail-header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 85px;
+            left: 300px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7fa;
+            color: #7a8594;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .big-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .group-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        .group-members {
+            font-size: 16px;
+            color: #7a8594;
+            margin-top: 5px;
+        }
+        
+        .group-description {
+            font-size: 14px;
+            color: #7a8594;
+            margin-top: 15px;
+            padding: 0 20px;
+        }
+        
+        .detail-actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .action-btn i {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e1e8ff;
+            color: #2575fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-members {
+            padding: 20px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+        
+        .members-list {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0 15px;
+        }
+        
+        .member-item {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 10px 0;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+        
+        .member-info {
+            flex: 1;
+        }
+        
+        .member-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        
+        .member-info p {
+            font-size: 13px;
+            color: #7a8594;
+        }
+        
+        .admin-badge {
+            background: #2575fc;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .add-member {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            color: #2575fc;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        
+        .add-member i {
+            margin-right: 10px;
+        }
+        
+        .detail-options {
+            padding: 20px 0;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-item:hover {
+            background: #f5f7fa;
+        }
+        
+        .option-item i {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .leave-group {
+            color: #e74c3c;
+        }
+        
+        .leave-group i {
+            background: #ffebee;
+            color: #e74c3c;
+        }
+    </style>
+       <script>
+        // 获取所有选项卡
+        const tabs = document.querySelectorAll('.tab');
+        
+        // 为每个选项卡添加点击事件
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 根据选项卡文本决定跳转目标
+                if(this.textContent.includes('联系人')) {
+                    window.location.href = 'contacts.html';
+                } else if(this.textContent.includes('消息')) {
+                    window.location.href = 'chat.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

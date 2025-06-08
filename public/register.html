@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGO - 注册</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #2575fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        #register-container {
+            position: relative;
+            width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+        
+        #register-container:hover {
+            transform: translateY(-5px);
+        }
+        
+        #register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, #6a11cb, #2575fc, #00d2ff);
+            animation: borderAnimation 3s linear infinite;
+        }
+        
+        @keyframes borderAnimation {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .logo h1 {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+        }
+        
+        .logo p {
+            color: #666;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 50px;
+            border: 2px solid #e1e1e1;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 10px rgba(37, 117, 252, 0.2);
+        }
+        
+        .password-rules {
+            font-size: 12px;
+            color: #666;
+            margin: -15px 0 20px 15px;
+        }
+        
+        .terms {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .terms input {
+            margin-right: 8px;
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(37, 117, 252, 0.4);
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(37, 117, 252, 0.6);
+        }
+        
+        .register-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+            color: #999;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e1e1e1;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+        }
+        
+        .social-register {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .social-btn:nth-child(1) { background: linear-gradient(45deg, #25D366, #128C7E); }
+        .social-btn:nth-child(2) { background: linear-gradient(45deg, #4267B2, #3b5998); }
+        .social-btn:nth-child(3) { background: linear-gradient(45deg, #e1306c, #c13584); }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        
+        .login-link a {
+            color: #2575fc;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .login-link a:hover {
+            color: #6a11cb;
+            text-decoration: underline;
+        }
+        
+        .bubbles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .bubbles li {
+            position: absolute;
+            list-style: none;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            bottom: -150px;
+            border-radius: 50%;
+            animation: bubble 15s infinite linear;
+        }
+        
+        .bubbles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .bubbles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .bubbles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .bubbles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .bubbles li:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .bubbles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .bubbles li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .bubbles li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .bubbles li:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .bubbles li:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+        
+        @keyframes bubble {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+        
+        .footer {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            text-align: right;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .password-strength {
+            height: 5px;
+            margin: 5px 0 15px 0;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            background: #ff4757;
+            transition: all 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            #register-container {
+                width: 90%;
+                padding: 30px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <ul class="bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    
+    <div id="register-container">
+        <div class="logo">
+            <h1>MyGO</h1>
+            <p>创建您的账户</p>
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" placeholder="用户名" id="username">
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" placeholder="电子邮箱" id="email">
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <input type="tel" placeholder="手机号码" id="phone">
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="密码" id="password">
+        </div>
+        
+        <div class="password-strength">
+            <div class="password-strength-bar" id="password-strength-bar"></div>
+        </div>
+        
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="确认密码" id="confirm-password">
+        </div>
+        
+        <div class="terms">
+            <input type="checkbox" id="terms">
+            <label for="terms">我已阅读并同意<a href="#">服务条款</a>和<a href="#">隐私政策</a></label>
+        </div>
+        
+        <button class="register-btn" id="register-btn">注册</button>
+        
+        <div class="divider">
+            <span>或通过以下方式注册</span>
+        </div>
+        
+        <div class="social-register">
+            <div class="social-btn">
+                <i class="fab fa-weixin"></i>
+            </div>
+            <div class="social-btn">
+                <i class="fab fa-qq"></i>
+            </div>
+            <div class="social-btn">
+                <i class="fab fa-weibo"></i>
+            </div>
+        </div>
+        
+        <div class="login-link">
+            已有账号? <a href="login.html">立即登录</a>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>MyGO © 2025 版权所有 | 隐私政策 | 服务条款</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerBtn = document.getElementById('register-btn');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const passwordBar = document.getElementById('password-strength-bar');
+            
+            // 密码强度检测
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                
+                if (password.length > 7) strength += 25;
+                if (/[A-Z]/.test(password)) strength += 25;
+                if (/[a-z]/.test(password)) strength += 25;
+                if (/[0-9]/.test(password)) strength += 25;
+                
+                passwordBar.style.width = strength + '%';
+                
+                // 设置颜色
+                if (strength < 50) {
+                    passwordBar.style.background = '#ff4757';
+                } else if (strength < 75) {
+                    passwordBar.style.background = '#ffa502';
+                } else {
+                    passwordBar.style.background = '#2ed573';
+                }
+            });
+            
+            // 注册功能
+            registerBtn.addEventListener('click', function() {
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const password = passwordInput.value.trim();
+                const confirmPassword = confirmPasswordInput.value.trim();
+                const terms = document.getElementById('terms').checked;
+                
+                if (!username) {
+                    animateInput(document.getElementById('username'));
+                    return;
+                }
+                
+                if (!email) {
+                    animateInput(document.getElementById('email'));
+                    return;
+                }
+                
+                if (!phone) {
+                    animateInput(document.getElementById('phone'));
+                    return;
+                }
+                
+                if (!password) {
+                    animateInput(passwordInput);
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    animateInput(confirmPasswordInput);
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+                
+                if (!terms) {
+                    alert('请阅读并同意服务条款和隐私政策');
+                    return;
+                }
+                
+                registerBtn.textContent = '注册中...';
+                registerBtn.style.background = 'linear-gradient(45deg, #00c853, #1b5e20)';
+                
+                setTimeout(() => {
+                    registerBtn.textContent = '注册成功!';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1000);
+                }, 1500);
+            });
+            
+            function animateInput(input) {
+                input.style.borderColor = '#ff4757';
+                input.style.animation = 'shake 0.5s';
+                
+                setTimeout(() => {
+                    input.style.borderColor = '#e1e1e1';
+                    input.style.animation = '';
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
