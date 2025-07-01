@@ -1,0 +1,11 @@
+{
+  "dbConfig": {
+    "host": "localhost",
+    "user": "root",
+    "password": "your_password",
+    "database": "chat_db",
+    "connectionLimit": 10
+  },
+  "serverPort": 3000,
+  "jwtSecret": "your_jwt_secret_key"
+}

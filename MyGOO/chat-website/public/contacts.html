@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGO - 联系人</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #2575fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 联系人界面 */
+        #contacts-container {
+            width: 800px;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .contacts-header {
+            height: 70px;
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        
+        .header-left img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .user-info h3 {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .user-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .header-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .contacts-main {
+            display: flex;
+            height: calc(100% - 70px);
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #f5f7fa;
+            border-right: 1px solid #e6e9ed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 20px;
+            border: 1px solid #e1e4e8;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0a7b0;
+        }
+        
+        .add-contact {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e6ebf5;
+            color: #2575fc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-contact:hover {
+            background: #2575fc;
+            color: white;
+        }
+        
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e6e9ed;
+            padding: 0 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #7a8594;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #2575fc;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #2575fc;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .contacts-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9fafc;
+            scrollbar-width: none;
+        }
+        
+        .contact-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;  /* 添加这行使列表可滚动 */
+            height: 100%;   
+            scrollbar-width: none;
+        }
+        
+        .group {
+            margin-bottom: 10px;
+        }
+        
+        .group-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2575fc;
+            margin-bottom: 10px;
+            padding-left: 15px;
+        }
+        
+        .contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .contact {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 10px;
+        }
+        
+        .contact:hover {
+            background: #ebf0fa;
+        }
+        
+        .contact.active {
+            background: #e1e8ff;
+        }
+        
+        .contact-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid #e6e9ed;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .contact-info p {
+            font-size: 13px;
+            color: #7a8594;
+        }
+        
+        .contact-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .contact-status.online {
+            background: #2ecc71;
+        }
+        
+        .contact-status.offline {
+            background: #a0a7b0;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            #contacts-container {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .contact-info, .search-box input, .add-contact span, .tab span {
+                display: none;
+            }
+            
+            .search-box {
+                width: 40px;
+            }
+            
+            .search-box i {
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 联系人界面 -->
+    <div id="contacts-container">
+        <div class="contacts-header">
+            <div class="header-left" onclick="window.location.href='myPage.html'">
+                <a href="chat.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <img src="./assets/images/千早爱音.jpg" alt="用户头像">
+                <div class="user-info">
+                    <h3>我的联系人</h3>
+                    <p>共 32 位联系人</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contacts-main">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索联系人">
+                    </div>
+                    <div class="add-contact">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                </div>
+                
+                <div class="sidebar-tabs">
+                    <div class="tab"><span>消息</span></div>
+                    <div class="tab active"><span>联系人</span></div>
+                    <div class="tab"><span>群聊</span></div>
+                </div>
+                
+                <div class="contact-groups">
+                    <div class="group">
+                        <div class="group-title">最近联系</div>
+                        <div class="contact-list">
+                            <div class="contact active">
+                                <img src="./assets/images/千早爱音.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>千早爱音</h4>
+                                    <p>主唱</p>
+                                </div>
+                                <div class="contact-status online"></div>
+                            </div>
+                            
+                            <div class="contact">
+                                <img src="./assets/images/高松灯.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>高松灯</h4>
+                                    <p>吉他手</p>
+                                </div>
+                                <div class="contact-status online"></div>
+                            </div>
+                            
+                            <div class="contact">
+                                <img src="./assets/images/椎名立希.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>椎名立希</h4>
+                                    <p>吉他手</p>
+                                </div>
+                                <div class="contact-status offline"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="group">
+                        <div class="group-title">B</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/八幡海铃.jpeg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>八幡海铃</h4>
+                                    <p>贝斯手</p>
+                                </div>
+                                <div class="contact-status online"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">C</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/长崎素世.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>长崎素世</h4>
+                                    <p>鼓手</p>
+                                </div>
+                                <div class="contact-status offline"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">F</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/丰川祥子.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>丰川祥子</h4>
+                                    <p>经理</p>
+                                </div>
+                                <div class="contact-status offline"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <div class="group-title">R</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/若叶睦.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>若叶睦</h4>
+                                    <p>经纪人</p>
+                                </div>
+                                <div class="contact-status online"></div>
+                            </div>
+                        </div>
+                    </div>
+            
+
+                    <div class="group">
+                        <div class="group-title">S</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/三角初华.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>三角初华</h4>
+                                    <p>制作人</p>
+                                </div>
+                                <div class="contact-status offline"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="group">
+                        <div class="group-title">Y</div>
+                        <div class="contact-list">
+                            <div class="contact">
+                                <img src="./assets/images/要乐奈.jpg" alt="头像" class="contact-avatar">
+                                <div class="contact-info">
+                                    <h4>要乐奈</h4>
+                                    <p>键盘手</p>
+                                </div>
+                                <div class="contact-status online"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contacts-content">
+                <!-- 联系人详情区域 -->
+                <div class="contact-detail">
+                    <div class="detail-header">
+                        <div class="back-btn" onclick="history.back()">
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                        <div class="avatar-container">
+                            <img src="./assets/images/千早爱音.jpg" alt="千早爱音头像" class="big-avatar">
+                        </div>
+                        <h2 class="contact-name">千早爱音</h2>
+                        <p class="contact-position">主唱</p>
+                        <div class="contact-status-badge">
+                            <span class="status-dot"></span>
+                            <span class="status-text">在线</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-phone-alt"></i>
+                            <span>通话</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-video"></i>
+                            <span>视频</span>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-comment"></i>
+                            <span>消息</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info">
+                        <h3 class="section-title">联系方式</h3>
+                        <div class="info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>chihaya@example.com</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+81 123 4567 8910</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>东京都港区赤坂9-8-7</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-groups">
+                        <h3 class="section-title">所在群组</h3>
+                        <div class="group-list">
+                            <div class="group-item">
+                                <div class="group-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <span>MyGO! Band</span>
+                            </div>
+                            <div class="group-item">
+                                <div class="group-icon">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <span>演出安排</span>
+                            </div>
+                            <div class="group-item">
+                                <div class="group-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <span>新专辑制作</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-options">
+                        <div class="option-item">
+                            <i class="fas fa-star"></i>
+                            <span>设为星标联系人</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-file-image"></i>
+                            <span>查看共享文件</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-ban"></i>
+                            <span>屏蔽联系人</span>
+                        </div>
+                        <div class="option-item">
+                            <i class="fas fa-trash"></i>
+                            <span>删除联系人</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>MyGO © 2025 版权所有 | 隐私政策 | 服务条款</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 选择联系人事件
+            const contacts = document.querySelectorAll('.contact');
+            contacts.forEach(contact => {
+                contact.addEventListener('click', function() {
+                    contacts.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新右侧详情（实际项目中会通过API获取数据）
+                    const contactName = this.querySelector('h4').textContent;
+                    const contactAvatar = this.querySelector('.contact-avatar').src;
+                    const contactPosition = this.querySelector('p').textContent;
+                    
+                    document.querySelector('.contact-name').textContent = contactName;
+                    document.querySelector('.big-avatar').src = contactAvatar;
+                    document.querySelector('.contact-position').textContent = contactPosition;
+                    
+                    // 更新状态（简单模拟，实际应从数据中获取）
+                    const isOnline = this.querySelector('.contact-status.online') !== null;
+                    const statusDot = document.querySelector('.status-dot');
+                    const statusText = document.querySelector('.status-text');
+                    
+                    if (isOnline) {
+                        statusDot.classList.add('online');
+                        statusDot.classList.remove('offline');
+                        statusText.textContent = '在线';
+                    } else {
+                        statusDot.classList.add('offline');
+                        statusDot.classList.remove('online');
+                        statusText.textContent = '离线';
+                    }
+                });
+            });
+            
+            // 添加消息按钮点击事件
+            const messageBtns = document.querySelectorAll('.action-btn');
+            messageBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if(this.textContent.includes('消息')) {
+                        // 获取当前联系人姓名
+                        const contactName = document.querySelector('.contact-name').textContent;
+                        // 跳转到聊天页面并传递联系人参数
+                        window.location.href = `chat.html?contact=${encodeURIComponent(contactName)}`;
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <style>
+        /* 详情页样式 */
+        .detail-header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 85px;
+            left: 300px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f7fa;
+            color: #7a8594;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .big-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        .contact-position {
+            font-size: 16px;
+            color: #7a8594;
+            margin-top: 5px;
+        }
+        
+        .contact-status-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #2ecc71;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-dot.online {
+            background: #2ecc71;
+        }
+        
+        .status-dot.offline {
+            background: #a0a7b0;
+        }
+        
+        .detail-actions {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .action-btn i {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e1e8ff;
+            color: #2575fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .detail-info, .detail-groups, .detail-options {
+            padding: 20px 0;
+            border-bottom: 1px solid #e6e9ed;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-left: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .info-item:hover {
+            background: #f5f7fa;
+        }
+        
+        .info-item i {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f5f7fa;
+            color: #2575fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .group-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 0 15px;
+        }
+        
+        .group-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 15px;
+            background: #f5f7fa;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .group-item:hover {
+            background: #e1e8ff;
+        }
+        
+        .group-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2575fc;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .option-item:hover {
+            background: #f5f7fa;
+        }
+        
+        .option-item i {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f5f7fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+    </style>
+   <script>
+    // 获取所有选项卡
+    const tabs = document.querySelectorAll('.tab');
+    
+    // 为每个选项卡添加点击事件
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // 根据选项卡文本决定跳转目标
+            if(this.textContent.includes('消息')) {
+                window.location.href = 'chat.html';
+            } else if(this.textContent.includes('群聊')) {
+                window.location.href = 'groups.html';
+            }
+        });
+    });
+</script>
+</body>
+</html>

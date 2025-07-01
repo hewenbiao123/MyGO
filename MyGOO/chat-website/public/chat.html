@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyGO - 聊天系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #2575fc);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* 聊天界面 */
+        #chat-container {
+            width: 1000px;
+            height: 700px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .chat-header {
+            height: 70px;
+            background: linear-gradient(45deg, #2575fc, #6a11cb);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            justify-content: space-between;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+        
+        .header-left img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .user-info h3 {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .user-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .header-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .chat-main {
+            display: flex;
+            height: calc(100% - 70px );
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #f5f7fa;
+            border-right: 1px solid #e6e9ed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+           
+        }
+        
+        .sidebar-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border-radius: 20px;
+            border: 1px solid #e1e4e8;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0a7b0;
+        }
+        
+        .add-contact {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e6ebf5;
+            color: #2575fc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .add-contact:hover {
+            background: #2575fc;
+            color: white;
+        }
+        
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid #e6e9ed;
+            padding: 0 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #7a8594;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #2575fc;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #2575fc;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            scrollbar-width: none;
+        }
+        
+        .contact {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        
+        .contact:hover {
+            background: #ebf0fa;
+        }
+        
+        .contact.active {
+            background: #e1e8ff;
+        }
+        
+        .contact-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid #e6e9ed;
+        }
+        
+        .contact-info {
+            flex: 1;
+        }
+        
+        .contact-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .contact-meta {
+            text-align: right;
+            font-size: 12px;
+            color: #a0a7b0;
+        }
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9fafc;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #7a8594;
+        }
+        
+        .empty-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-text {
+            font-size: 16px;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border-radius: 18px;
+            position: relative;
+            animation: fadeIn 0.3s;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .incoming {
+            align-self: flex-start;
+            background: white;
+            border: 1px solid #e6e9ed;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .outgoing {
+            align-self: flex-end;
+            background: #e1e8ff;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #a0a7b0;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .chat-input-area {
+            height: 80px;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e6e9ed;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-tools {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .tool-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7a8594;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tool-btn:hover {
+            background: #f0f2f5;
+            color: #2575fc;
+        }
+        
+        .message-input {
+            flex: 1;
+            height: 50px;
+            border: none;
+            outline: none;
+            padding: 0 15px;
+            font-size: 15px;
+            resize: none;
+            background: #f5f7fa;
+            border-radius: 25px;
+            padding: 15px 20px;
+            line-height: 1.5;
+        }
+        
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2575fc;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            outline: none;
+        }
+        
+        .send-btn:hover {
+            background: #1c65e0;
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            z-index: 2;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            #chat-container {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .contact-info, .search-box input, .add-contact span, .tab span {
+                display: none;
+            }
+            
+            .search-box {
+                width: 40px;
+            }
+            
+            .search-box i {
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 聊天界面 -->
+    <div id="chat-container">
+        <div class="chat-header">
+            <div class="header-left" onclick="window.location.href='myPage.html'">
+                <img src="./assets/images/千早爱音.jpg" alt="用户头像">
+                <div class="user-info">
+                    <h3>千早爱音</h3>
+                    <p>在线</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-icon">
+                    <i class="fas fa-phone-alt"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-main">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="搜索联系人">
+                    </div>
+                    <div class="add-contact">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                </div>
+                
+                <div class="sidebar-tabs">
+                    <div class="tab active"><span>消息</span></div>
+                    <div class="tab"><span>联系人</span></div>
+                    <div class="tab"><span>群聊</span></div>
+                </div>
+                
+                <div class="contact-list">
+                    
+                    
+                    <div class="contact">
+                        <img src="./assets/images/高松灯.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>高松灯</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>14:22</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/椎名立希.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>椎名立希</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>13:45</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/长崎素世.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>长崎素世</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>12:18</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/要乐奈.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>要乐奈</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>10:05</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/丰川祥子.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>丰川祥子</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>昨天</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/三角初华.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>三角初华</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>昨天</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/若叶睦.jpg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>若叶睦</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>周三</div>
+                        </div>
+                    </div>
+                    
+                    <div class="contact">
+                        <img src="./assets/images/八幡海铃.jpeg" alt="头像" class="contact-avatar">
+                        <div class="contact-info">
+                            <h4>八幡海铃</h4>
+                        </div>
+                        <div class="contact-meta">
+                            <div>周二</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-area">
+                <div class="chat-history" id="chat-history">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="far fa-comment-dots"></i>
+                        </div>
+                        <div class="empty-text">
+                           
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="input-tools">
+                        <div class="tool-btn">
+                            <i class="far fa-smile"></i>
+                        </div>
+                        <div class="tool-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </div>
+                        <div class="tool-btn">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                    <textarea class="message-input" id="message-input" placeholder="输入消息..."></textarea>
+                    <button class="send-btn" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>MyGO © 2025 版权所有 | 隐私政策 | 服务条款</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sendBtn = document.getElementById('send-btn');
+            const messageInput = document.getElementById('message-input');
+            const chatHistory = document.getElementById('chat-history');
+            const currentContact = document.getElementById('current-contact');
+            
+            // 模拟聊天数据
+            const contactsData = {
+                '高松灯': [
+                    { type: 'incoming', content: '你好！最近在忙什么呢？', time: '09:30' },
+                    { type: 'outgoing', content: '刚完成一个项目，正在休息。你呢？', time: '09:32' },
+                    { type: 'incoming', content: '我也是，刚考完试，准备放松一下。', time: '09:35' },
+                    { type: 'incoming', content: '周末要不要一起去看电影？', time: '09:36' },
+                    { type: 'outgoing', content: '好啊！想看什么电影？', time: '09:38' }
+                ],
+                '椎名立希': [
+                    { type: 'incoming', content: '代码写完了吗？明天就要提交了。', time: '14:20' },
+                    { type: 'outgoing', content: '快了，还有一点bug在调试。', time: '14:22' },
+                    { type: 'incoming', content: '需要帮忙吗？我这边正好有空。', time: '14:25' },
+                    { type: 'outgoing', content: '太好了！我发你代码，帮我看看这个问题。', time: '14:26' }
+                ],
+                '长崎素世': [
+                    { type: 'incoming', content: '上次借你的书看完了吗？', time: '11:10' },
+                    { type: 'outgoing', content: '看完了，写得非常好！什么时候还给你？', time: '11:12' },
+                    { type: 'incoming', content: '不急，你先放着吧，我最近也没时间看。', time: '11:15' },
+                    { type: 'incoming', content: '对了，书里的那个问题你怎么看？', time: '11:16' }
+                ]
+            };
+
+            // 修改addMessage函数以支持自定义时间
+            function addMessage(type, content, time = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', type);
+
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                messageContent.textContent = content;
+
+                const messageTime = document.createElement('div');
+                messageTime.classList.add('message-time');
+
+                const now = new Date();
+                const timeString = time || `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+                messageTime.textContent = timeString;
+
+                messageDiv.appendChild(messageContent);
+                messageDiv.appendChild(messageTime);
+
+                chatHistory.appendChild(messageDiv);
+
+                // 滚动到底部
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+            
+            sendBtn.addEventListener('click', function() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    // 添加用户消息
+                    addMessage('outgoing', message);
+                    
+                    // 清空输入框
+                    messageInput.value = '';
+                    
+                    // 移除空状态提示
+                    const emptyState = document.querySelector('.empty-state');
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+                }
+            });
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendBtn.click();
+                }
+            });
+            
+            function addMessage(type, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', type);
+                
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                messageContent.textContent = content;
+                
+                const messageTime = document.createElement('div');
+                messageTime.classList.add('message-time');
+                
+                const now = new Date();
+                const timeString = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+                
+                messageTime.textContent = timeString;
+                
+                messageDiv.appendChild(messageContent);
+                messageDiv.appendChild(messageTime);
+                
+                chatHistory.appendChild(messageDiv);
+                
+                // 滚动到底部
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+            
+            // 联系人点击事件
+            const contacts = document.querySelectorAll('.contact');
+            contacts.forEach(contact => {
+                contact.addEventListener('click', function() {
+                    contacts.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新聊天对象
+                    const contactName = this.querySelector('h4').textContent;
+                    const contactAvatar = this.querySelector('.contact-avatar').src;
+                    
+                    // 更新当前联系人显示
+                    document.getElementById('current-contact').textContent = contactName;
+                    document.querySelector('.header-left img').src = contactAvatar;
+                    
+                    // 更新聊天历史区域
+                    const chatHistory = document.getElementById('chat-history');
+                    chatHistory.innerHTML = '';
+                    
+                    // 加载模拟聊天数据
+                    const messages = contactsData[contactName] || [];
+                    if (messages.length > 0) {
+                        messages.forEach(msg => {
+                            addMessage(msg.type, msg.content, msg.time);
+                        });
+                    } else {
+                        chatHistory.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="far fa-comment-dots"></i>
+                                </div>
+                                <div class="empty-text">
+                                    开始与 <span id="current-contact">${contactName}</span> 聊天吧
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 联系人按钮跳转
+            document.querySelector('.tab:nth-child(2)').addEventListener('click', function() {
+                window.location.href = 'contacts.html';
+            });
+            
+            // 群聊按钮跳转
+            document.querySelector('.tab:nth-child(3)').addEventListener('click', function() {
+                window.location.href = 'groups.html';
+            });
+        });
+    </script>
+</body>
+</html>
